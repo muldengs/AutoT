@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autot.call.mapper.CallMapper">
+
+    <select id="selectRsvdt" parameterType="map" resultType="map">
+		with RECURSIVE A as (
+		 	select 1 AS LEVEL
+			UNION ALL 
+			select 1+A.LEVEL 
+			from A 
+			where A.LEVEL <![CDATA[<]]> ( select t1.CODDES LEVEL
+							   				from SYSCOD t1
+							  			   where t1.PARCOD  = '10000400'
+							    			 and t1.COD = #{cod}  )
+		) 
+		select ADDDATE( CURDATE(), LEVEL )  as rsvdt
+		     , CONCAT(date_format(ADDDATE( CURDATE(), LEVEL ),'%m'),'월'
+		     		 ,date_format(ADDDATE( CURDATE(), LEVEL ),'%d'),'일',' '
+		     		 ,(case when DayofWeek(ADDDATE( CURDATE(), LEVEL )) = 1 then '일요일'
+		     		 		when DayofWeek(ADDDATE( CURDATE(), LEVEL )) = 2 then '월요일'
+		     		 		when DayofWeek(ADDDATE( CURDATE(), LEVEL )) = 3 then '화요일'
+		     		 		when DayofWeek(ADDDATE( CURDATE(), LEVEL )) = 4 then '수요일'
+		     		 		when DayofWeek(ADDDATE( CURDATE(), LEVEL )) = 5 then '목요일'
+		     		 		when DayofWeek(ADDDATE( CURDATE(), LEVEL )) = 6 then '금요일'
+		     		 		when DayofWeek(ADDDATE( CURDATE(), LEVEL )) = 7 then '토요일'
+		     		 		end)) as rsvdtdp
+		  from A
+    </select>
+        
+    <!-- 서울 예약가능시간 06:00 ~ 21:00  -->
+    <select id="selectRsvtmcarSeoul" parameterType="map" resultType="map">
+	WITH A AS (
+		SELECT ADDTIME('06:00:00', '00:00:00') RSVTM, ADDTIME('06:00:00', '00:00:00') RSVFTM, ADDTIME('06:00:00', '00:19:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '00:20:00') RSVTM, ADDTIME('06:00:00', '00:20:00') RSVFTM, ADDTIME('06:00:00', '00:39:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '00:40:00') RSVTM, ADDTIME('06:00:00', '00:40:00') RSVFTM, ADDTIME('06:00:00', '00:59:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '01:00:00') RSVTM, ADDTIME('06:00:00', '01:00:00') RSVFTM, ADDTIME('06:00:00', '01:19:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '01:20:00') RSVTM, ADDTIME('06:00:00', '01:20:00') RSVFTM, ADDTIME('06:00:00', '01:39:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '01:40:00') RSVTM, ADDTIME('06:00:00', '01:40:00') RSVFTM, ADDTIME('06:00:00', '01:59:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '02:00:00') RSVTM, ADDTIME('06:00:00', '02:00:00') RSVFTM, ADDTIME('06:00:00', '02:19:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '02:20:00') RSVTM, ADDTIME('06:00:00', '02:20:00') RSVFTM, ADDTIME('06:00:00', '02:39:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '02:40:00') RSVTM, ADDTIME('06:00:00', '02:40:00') RSVFTM, ADDTIME('06:00:00', '02:59:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '03:00:00') RSVTM, ADDTIME('06:00:00', '03:00:00') RSVFTM, ADDTIME('06:00:00', '03:19:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '03:20:00') RSVTM, ADDTIME('06:00:00', '03:20:00') RSVFTM, ADDTIME('06:00:00', '03:39:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '03:40:00') RSVTM, ADDTIME('06:00:00', '03:40:00') RSVFTM, ADDTIME('06:00:00', '03:59:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '04:00:00') RSVTM, ADDTIME('06:00:00', '04:00:00') RSVFTM, ADDTIME('06:00:00', '04:19:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '04:20:00') RSVTM, ADDTIME('06:00:00', '04:20:00') RSVFTM, ADDTIME('06:00:00', '04:39:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '04:40:00') RSVTM, ADDTIME('06:00:00', '04:40:00') RSVFTM, ADDTIME('06:00:00', '04:59:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '05:00:00') RSVTM, ADDTIME('06:00:00', '05:00:00') RSVFTM, ADDTIME('06:00:00', '05:19:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '05:20:00') RSVTM, ADDTIME('06:00:00', '05:20:00') RSVFTM, ADDTIME('06:00:00', '05:39:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '05:40:00') RSVTM, ADDTIME('06:00:00', '05:40:00') RSVFTM, ADDTIME('06:00:00', '05:59:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '06:00:00') RSVTM, ADDTIME('06:00:00', '06:00:00') RSVFTM, ADDTIME('06:00:00', '06:19:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '06:20:00') RSVTM, ADDTIME('06:00:00', '06:20:00') RSVFTM, ADDTIME('06:00:00', '06:39:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '06:40:00') RSVTM, ADDTIME('06:00:00', '06:40:00') RSVFTM, ADDTIME('06:00:00', '06:59:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '08:00:00') RSVTM, ADDTIME('06:00:00', '08:00:00') RSVFTM, ADDTIME('06:00:00', '08:19:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '08:20:00') RSVTM, ADDTIME('06:00:00', '08:20:00') RSVFTM, ADDTIME('06:00:00', '08:39:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '08:40:00') RSVTM, ADDTIME('06:00:00', '08:40:00') RSVFTM, ADDTIME('06:00:00', '08:59:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '09:00:00') RSVTM, ADDTIME('06:00:00', '09:00:00') RSVFTM, ADDTIME('06:00:00', '09:19:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '09:20:00') RSVTM, ADDTIME('06:00:00', '09:20:00') RSVFTM, ADDTIME('06:00:00', '09:39:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '09:40:00') RSVTM, ADDTIME('06:00:00', '09:40:00') RSVFTM, ADDTIME('06:00:00', '09:59:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '10:00:00') RSVTM, ADDTIME('06:00:00', '10:00:00') RSVFTM, ADDTIME('06:00:00', '10:19:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '10:20:00') RSVTM, ADDTIME('06:00:00', '10:20:00') RSVFTM, ADDTIME('06:00:00', '10:39:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '10:40:00') RSVTM, ADDTIME('06:00:00', '10:40:00') RSVFTM, ADDTIME('06:00:00', '10:59:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '11:00:00') RSVTM, ADDTIME('06:00:00', '11:00:00') RSVFTM, ADDTIME('06:00:00', '11:19:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '11:20:00') RSVTM, ADDTIME('06:00:00', '11:20:00') RSVFTM, ADDTIME('06:00:00', '11:39:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '11:40:00') RSVTM, ADDTIME('06:00:00', '11:40:00') RSVFTM, ADDTIME('06:00:00', '11:59:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '12:00:00') RSVTM, ADDTIME('06:00:00', '12:00:00') RSVFTM, ADDTIME('06:00:00', '12:19:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '12:20:00') RSVTM, ADDTIME('06:00:00', '12:20:00') RSVFTM, ADDTIME('06:00:00', '12:39:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '12:40:00') RSVTM, ADDTIME('06:00:00', '12:40:00') RSVFTM, ADDTIME('06:00:00', '12:59:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '13:00:00') RSVTM, ADDTIME('06:00:00', '13:00:00') RSVFTM, ADDTIME('06:00:00', '13:19:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '13:20:00') RSVTM, ADDTIME('06:00:00', '13:20:00') RSVFTM, ADDTIME('06:00:00', '13:39:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '13:40:00') RSVTM, ADDTIME('06:00:00', '13:40:00') RSVFTM, ADDTIME('06:00:00', '13:59:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '14:00:00') RSVTM, ADDTIME('06:00:00', '14:00:00') RSVFTM, ADDTIME('06:00:00', '14:19:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '14:20:00') RSVTM, ADDTIME('06:00:00', '14:20:00') RSVFTM, ADDTIME('06:00:00', '14:39:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '14:40:00') RSVTM, ADDTIME('06:00:00', '14:40:00') RSVFTM, ADDTIME('06:00:00', '14:59:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '15:00:00') RSVTM, ADDTIME('06:00:00', '15:00:00') RSVFTM, ADDTIME('06:00:00', '15:19:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '15:20:00') RSVTM, ADDTIME('06:00:00', '15:20:00') RSVFTM, ADDTIME('06:00:00', '15:39:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '15:40:00') RSVTM, ADDTIME('06:00:00', '15:40:00') RSVFTM, ADDTIME('06:00:00', '15:59:59') RSVTTM
+		UNION ALL 
+		SELECT ADDTIME('06:00:00', '16:00:00') RSVTM, ADDTIME('06:00:00', '16:00:00') RSVFTM, ADDTIME('06:00:00', '16:19:59') RSVTTM
+	) 
+	SELECT A.RSVTM as rsvtm
+	     , (select count(a1.CARSEQ) 
+	     	  from CARINF a1
+	     	  	   inner join CARTYP a2 on
+	     	  	   a1.CARTYPSEQ = a2.CARTYPSEQ
+	     	  	   and a1.XSTA = a2.XSTA
+	     	  	   and a2.REGSEQ = #{regseq}
+	     	  	   and a2.WCHYN = #{wchyn}     
+	     	 where a1.XSTA = '0') AS carmaxcnt
+	     , (select count(a2.CARSEQ)
+			  from CAL a1
+				   inner join ASNDAT a2 on
+				   a1.CALSEQ = a2.CALSEQ   
+			 where a1.CANYN = 'N'
+			   and a1.REGSEQ = #{regseq}
+			   and a1.WCHYN = #{wchyn}
+			   and DATE(a1.CALYDT) = #{rsvdt}
+			   and TIME(a1.CALYDT) between TIME(A.RSVFTM) and TIME(A.RSVTTM))  AS carcnt
+	  FROM A
+	  ORDER BY 1
+    </select>    
+    
+    <!-- 판교 예약가능시간 07:00 ~ 20:00  -->
+    <select id="selectRsvtmcarPangyo" parameterType="map" resultType="map">
+	  WITH A AS (
+		  SELECT ADDTIME('07:00:00', '00:00:00') RSVTM, ADDTIME('07:00:00', '00:00:00') RSVFTM, ADDTIME('07:00:00', '00:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '00:20:00') RSVTM, ADDTIME('07:00:00', '00:20:00') RSVFTM, ADDTIME('07:00:00', '00:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '00:40:00') RSVTM, ADDTIME('07:00:00', '00:40:00') RSVFTM, ADDTIME('07:00:00', '00:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '01:00:00') RSVTM, ADDTIME('07:00:00', '01:00:00') RSVFTM, ADDTIME('07:00:00', '01:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '01:20:00') RSVTM, ADDTIME('07:00:00', '01:20:00') RSVFTM, ADDTIME('07:00:00', '01:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '01:40:00') RSVTM, ADDTIME('07:00:00', '01:40:00') RSVFTM, ADDTIME('07:00:00', '01:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '02:00:00') RSVTM, ADDTIME('07:00:00', '02:00:00') RSVFTM, ADDTIME('07:00:00', '02:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '02:20:00') RSVTM, ADDTIME('07:00:00', '02:20:00') RSVFTM, ADDTIME('07:00:00', '02:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '02:40:00') RSVTM, ADDTIME('07:00:00', '02:40:00') RSVFTM, ADDTIME('07:00:00', '02:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '03:00:00') RSVTM, ADDTIME('07:00:00', '03:00:00') RSVFTM, ADDTIME('07:00:00', '03:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '03:20:00') RSVTM, ADDTIME('07:00:00', '03:20:00') RSVFTM, ADDTIME('07:00:00', '03:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '03:40:00') RSVTM, ADDTIME('07:00:00', '03:40:00') RSVFTM, ADDTIME('07:00:00', '03:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '04:00:00') RSVTM, ADDTIME('07:00:00', '04:00:00') RSVFTM, ADDTIME('07:00:00', '04:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '04:20:00') RSVTM, ADDTIME('07:00:00', '04:20:00') RSVFTM, ADDTIME('07:00:00', '04:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '04:40:00') RSVTM, ADDTIME('07:00:00', '04:40:00') RSVFTM, ADDTIME('07:00:00', '04:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '05:00:00') RSVTM, ADDTIME('07:00:00', '05:00:00') RSVFTM, ADDTIME('07:00:00', '05:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '05:20:00') RSVTM, ADDTIME('07:00:00', '05:20:00') RSVFTM, ADDTIME('07:00:00', '05:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '05:40:00') RSVTM, ADDTIME('07:00:00', '05:40:00') RSVFTM, ADDTIME('07:00:00', '05:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '07:00:00') RSVTM, ADDTIME('07:00:00', '07:00:00') RSVFTM, ADDTIME('07:00:00', '07:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '07:20:00') RSVTM, ADDTIME('07:00:00', '07:20:00') RSVFTM, ADDTIME('07:00:00', '07:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '07:40:00') RSVTM, ADDTIME('07:00:00', '07:40:00') RSVFTM, ADDTIME('07:00:00', '07:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '08:00:00') RSVTM, ADDTIME('07:00:00', '08:00:00') RSVFTM, ADDTIME('07:00:00', '08:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '08:20:00') RSVTM, ADDTIME('07:00:00', '08:20:00') RSVFTM, ADDTIME('07:00:00', '08:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '08:40:00') RSVTM, ADDTIME('07:00:00', '08:40:00') RSVFTM, ADDTIME('07:00:00', '08:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '09:00:00') RSVTM, ADDTIME('07:00:00', '09:00:00') RSVFTM, ADDTIME('07:00:00', '09:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '09:20:00') RSVTM, ADDTIME('07:00:00', '09:20:00') RSVFTM, ADDTIME('07:00:00', '09:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '09:40:00') RSVTM, ADDTIME('07:00:00', '09:40:00') RSVFTM, ADDTIME('07:00:00', '09:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '10:00:00') RSVTM, ADDTIME('07:00:00', '10:00:00') RSVFTM, ADDTIME('07:00:00', '10:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '10:20:00') RSVTM, ADDTIME('07:00:00', '10:20:00') RSVFTM, ADDTIME('07:00:00', '10:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '10:40:00') RSVTM, ADDTIME('07:00:00', '10:40:00') RSVFTM, ADDTIME('07:00:00', '10:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '11:00:00') RSVTM, ADDTIME('07:00:00', '11:00:00') RSVFTM, ADDTIME('07:00:00', '11:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '11:20:00') RSVTM, ADDTIME('07:00:00', '11:20:00') RSVFTM, ADDTIME('07:00:00', '11:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '11:40:00') RSVTM, ADDTIME('07:00:00', '11:40:00') RSVFTM, ADDTIME('07:00:00', '11:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '12:00:00') RSVTM, ADDTIME('07:00:00', '12:00:00') RSVFTM, ADDTIME('07:00:00', '12:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '12:20:00') RSVTM, ADDTIME('07:00:00', '12:20:00') RSVFTM, ADDTIME('07:00:00', '12:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '12:40:00') RSVTM, ADDTIME('07:00:00', '12:40:00') RSVFTM, ADDTIME('07:00:00', '12:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('07:00:00', '13:00:00') RSVTM, ADDTIME('07:00:00', '13:00:00') RSVFTM, ADDTIME('07:00:00', '13:19:59') RSVTTM
+	  ) 
+	  SELECT A.RSVTM as rsvtm
+	     , (select count(a1.CARSEQ) 
+	     	  from CARINF a1
+	     	  	   inner join CARTYP a2 on
+	     	  	   a1.CARTYPSEQ = a2.CARTYPSEQ
+	     	  	   and a1.XSTA = a2.XSTA
+	     	  	   and a2.REGSEQ = #{regseq}
+	     	  	   and a2.WCHYN = #{wchyn}     
+	     	 where a1.XSTA = '0') AS carmaxcnt
+	       , (select count(a2.CARSEQ)
+		        from CAL a1
+		           	 inner join ASNDAT a2 on
+		           	 a1.CALSEQ = a2.CALSEQ   
+		       where a1.CANYN = 'N'
+		         and a1.REGSEQ = #{regseq}
+		         and a1.WCHYN = #{wchyn}
+		         and DATE(a1.CALYDT) = #{rsvdt}
+		         and TIME(a1.CALYDT) between TIME(A.RSVFTM) and TIME(A.RSVTTM))  AS carcnt
+	    FROM A
+	    ORDER BY 1
+    </select>
+    
+    <!-- 대구/세종 예약가능시간 09:00 ~ 18:00  -->
+    <select id="selectRsvtmcarDs" parameterType="map" resultType="map">
+	  WITH A AS (
+		  SELECT ADDTIME('09:00:00', '00:00:00') RSVTM, ADDTIME('09:00:00', '00:00:00') RSVFTM, ADDTIME('09:00:00', '00:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '00:20:00') RSVTM, ADDTIME('09:00:00', '00:20:00') RSVFTM, ADDTIME('09:00:00', '00:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '00:40:00') RSVTM, ADDTIME('09:00:00', '00:40:00') RSVFTM, ADDTIME('09:00:00', '00:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '01:00:00') RSVTM, ADDTIME('09:00:00', '01:00:00') RSVFTM, ADDTIME('09:00:00', '01:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '01:20:00') RSVTM, ADDTIME('09:00:00', '01:20:00') RSVFTM, ADDTIME('09:00:00', '01:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '01:40:00') RSVTM, ADDTIME('09:00:00', '01:40:00') RSVFTM, ADDTIME('09:00:00', '01:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '02:00:00') RSVTM, ADDTIME('09:00:00', '02:00:00') RSVFTM, ADDTIME('09:00:00', '02:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '02:20:00') RSVTM, ADDTIME('09:00:00', '02:20:00') RSVFTM, ADDTIME('09:00:00', '02:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '02:40:00') RSVTM, ADDTIME('09:00:00', '02:40:00') RSVFTM, ADDTIME('09:00:00', '02:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '03:00:00') RSVTM, ADDTIME('09:00:00', '03:00:00') RSVFTM, ADDTIME('09:00:00', '03:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '03:20:00') RSVTM, ADDTIME('09:00:00', '03:20:00') RSVFTM, ADDTIME('09:00:00', '03:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '03:40:00') RSVTM, ADDTIME('09:00:00', '03:40:00') RSVFTM, ADDTIME('09:00:00', '03:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '05:00:00') RSVTM, ADDTIME('09:00:00', '05:00:00') RSVFTM, ADDTIME('09:00:00', '05:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '05:20:00') RSVTM, ADDTIME('09:00:00', '05:20:00') RSVFTM, ADDTIME('09:00:00', '05:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '05:40:00') RSVTM, ADDTIME('09:00:00', '05:40:00') RSVFTM, ADDTIME('09:00:00', '05:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '06:00:00') RSVTM, ADDTIME('09:00:00', '06:00:00') RSVFTM, ADDTIME('09:00:00', '06:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '06:20:00') RSVTM, ADDTIME('09:00:00', '06:20:00') RSVFTM, ADDTIME('09:00:00', '06:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '06:40:00') RSVTM, ADDTIME('09:00:00', '06:40:00') RSVFTM, ADDTIME('09:00:00', '06:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '07:00:00') RSVTM, ADDTIME('09:00:00', '07:00:00') RSVFTM, ADDTIME('09:00:00', '07:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '07:20:00') RSVTM, ADDTIME('09:00:00', '07:20:00') RSVFTM, ADDTIME('09:00:00', '07:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '07:40:00') RSVTM, ADDTIME('09:00:00', '07:40:00') RSVFTM, ADDTIME('09:00:00', '07:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '08:00:00') RSVTM, ADDTIME('09:00:00', '08:00:00') RSVFTM, ADDTIME('09:00:00', '08:19:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '08:20:00') RSVTM, ADDTIME('09:00:00', '08:20:00') RSVFTM, ADDTIME('09:00:00', '08:39:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '08:40:00') RSVTM, ADDTIME('09:00:00', '08:40:00') RSVFTM, ADDTIME('09:00:00', '08:59:59') RSVTTM
+		  UNION ALL 
+		  SELECT ADDTIME('09:00:00', '09:00:00') RSVTM, ADDTIME('09:00:00', '09:00:00') RSVFTM, ADDTIME('09:00:00', '09:19:59') RSVTTM
+	  ) 
+	  SELECT A.RSVTM as rsvtm
+	     , (select count(a1.CARSEQ) 
+	     	  from CARINF a1
+	     	  	   inner join CARTYP a2 on
+	     	  	   a1.CARTYPSEQ = a2.CARTYPSEQ
+	     	  	   and a1.XSTA = a2.XSTA
+	     	  	   and a2.REGSEQ = #{regseq}
+	     	  	   and a2.WCHYN = #{wchyn}     
+	     	 where a1.XSTA = '0') AS carmaxcnt
+	       , (select count(a2.CARSEQ)
+		        from CAL a1
+		           	 inner join ASNDAT a2 on
+		           	 a1.CALSEQ = a2.CALSEQ   
+		       where a1.CANYN = 'N'
+		         and a1.REGSEQ = #{regseq}
+		         and a1.WCHYN = #{wchyn}
+		         and DATE(a1.CALYDT) = #{rsvdt}
+		         and TIME(a1.CALYDT) between TIME(A.RSVFTM) and TIME(A.RSVTTM))  AS carcnt
+	    FROM A
+	    ORDER BY 1
+    </select>
+    
+    <!-- 정류자 정보 -->
+    <select id="selectStnInfo" parameterType="map" resultType="map">
+    	select t1.STNSEQ as stnseq, t1.REGSEQ as regseq, t1.STNNAM as stnnam
+    	     , t1.ADR as adr, t1.LON as lon, t1.LAT as lat, t1.ORDNUM as ordunm
+    	  from STN t1
+    	 where t1.REGSEQ = #{regseq}
+    	   and t1.XSTA = '0'
+    	  order by t1.ORDNUM
+    </select>
+    
+    <!-- 정류장소요시간요금 정보  -->
+    <select id="selectStnPol" parameterType="map" resultType="map">
+    	select t1.REGSEQ as regseq, t1.SORDNUM as sordunm, t1.EORDNUM as eordunm
+    	     , t1.DIST as dist, t1.FEE as fee, t1.DISTTIME as disttime
+    	  from STNPOL t1
+    	 where t1.REGSEQ = #{regseq}
+    	   and t1.XSTA = '0'
+    	  order by t1.SORDNUM, t1.EORDNUM
+    </select>
+    
+    <!-- 탑승인원 정보  -->
+    <select id="selectSatCnt" parameterType="map" resultType="int">
+    	select t1.SATCNT as satcnt
+    	  from CARTYP t1
+    	 where t1.REGSEQ = #{regseq}
+    	   and t1.WCHYN = #{wchyn}
+    	   and t1.XSTA = '0'
+    </select>
+    
+    <!-- 즉시호출 등록  -->
+    <insert id="insertCalRsvN">
+        insert into CAL (RSVYN, USRSEQ, REGSEQ, DEPLON, DEPLAT, DEPADR, DEPSTNSEQ, DSTLON, DSTLAT, DSTADR, DSTSTNSEQ, WCHYN, SATCNT)
+        values (#{rsvyn}, #{usrseq}, #{regseq}, #{deplon}, #{deplat}, #{depadr}, #{depstnseq}, #{dstlon}, #{dstlat}, #{dstadr}, #{dststnseq}, #{wchyn}, #{satcnt})
+    </insert>
+    
+    <!-- 예약호출 등록  -->
+    <insert id="insertCalRsvY">
+        insert into CAL (RSVYN, USRSEQ, REGSEQ, DEPLON, DEPLAT, DEPADR, DEPSTNSEQ, DSTLON, DSTLAT, DSTADR, DSTSTNSEQ, WCHYN, SATCNT, CALYDT)
+        values (#{rsvyn}, #{usrseq}, #{regseq}, #{deplon}, #{deplat}, #{depadr}, #{depstnseq}, #{dstlon}, #{dstlat}, #{dstadr}, #{dststnseq}, #{wchyn}, #{satcnt}, #{calydt})
+    </insert>
+    
+    <!-- 호출 정보  -->
+    <select id="selectCalInfo" parameterType="map" resultType="map">
+        select t1.CALSEQ as calseq, t1.RSVYN as rsvyn, t1.REGSEQ as regseq, t3.REGNAM as regnam
+             , t1.DEPLON as deplon, t1.DEPLAT as deplat, t1.DEPADR as depadr, t1.DEPSTNSEQ as depstnseq
+             , t1.DSTLON as dstlon, t1.DSTLAT as dstlat, t1.DSTADR as dstadr, t1.DSTSTNSEQ as dststnseq
+             , t1.WCHYN as wchyn, t1.SATCNT as satcnt, t1.CALYDT as calydt, t1.CANYN as canyn
+             , t1.CANRSN as canrsn, t4.CODNAM as canrsnnam, t1.CANRSNDES as canrsndes, t2.DIST as dist
+             , t2.FEE as fee, t2.DISTTIME as disttime
+             , CONCAT(date_format(t1.CALYDT,'%m'),'월'
+		     		 ,date_format(t1.CALYDT,'%d'),'일',' '
+		     		 ,(case when DayofWeek(t1.CALYDT) = 1 then '일요일'
+		     		 		when DayofWeek(t1.CALYDT) = 2 then '월요일'
+		     		 		when DayofWeek(t1.CALYDT) = 3 then '화요일'
+		     		 		when DayofWeek(t1.CALYDT) = 4 then '수요일'
+		     		 		when DayofWeek(t1.CALYDT) = 5 then '목요일'
+		     		 		when DayofWeek(t1.CALYDT) = 6 then '금요일'
+		     		 		when DayofWeek(t1.CALYDT) = 7 then '토요일'
+		     		 		end),date_format(t1.CALYDT,'%H:%i:%s')) AS calydtdp
+             , CONCAT(date_format(t1.CALYDT,'%H:%i:%s'),' ~ ',CONCAT(ADDTIME(date_format(t1.CALYDT,'%H:%i:00'),CONCAT('00:',REPLACE(t2.DISTTIME, '분', '' ),':00'))),'(',t2.DISTTIME,')') AS disttimedp
+    	  from CAL t1
+               inner join STNPOL t2 on
+               t1.REGSEQ = t2.REGSEQ
+               and t1.DEPSTNSEQ = t2.SORDNUM
+               and t1.DSTSTNSEQ = t2.EORDNUM
+               and t2.XSTA = '0'
+               inner join REG t3 on
+               t1.REGSEQ = t3.REGSEQ
+               and t3.XSTA = '0'
+               left outer join SYSCOD t4 on
+               t1.CANRSN = t4.COD
+               and t4.PARCOD = '10000300'
+               and t4.XSTA = '0'
+    	 where t1.CALSEQ = (select max(a1.CALSEQ) 
+    	 					  from CAL a1
+    	 					 where a1.REGSEQ = #{regseq} 
+    	 					   and a1.USRSEQ = #{usrseq}
+    	 					   and a1.WCHYN = #{wchyn}
+    	 					 )
+    </select>
+    
+    <!-- 예약배차 등록  -->
+    <insert id="insertAsn">
+        insert into ASNDAT (CALSEQ, CARSEQ)
+        values (#{calseq}
+              ,(select min(a1.CARSEQ)
+				   from CARINF a1
+				   		inner join CARTYP a2 on
+				   		a1.CARTYPSEQ = a2.CARTYPSEQ
+				   		and a1.XSTA = a2.XSTA
+				   		and a2.REGSEQ = #{regseq}
+				   		and a2.WCHYN = #{wchyn}
+				  where a1.XSTA = '0' 
+				    and a1.CARSEQ not in (select b2.CARSEQ
+								            from CAL b1
+								           	     inner join ASNDAT b2 on
+								           	     b1.CALSEQ = b2.CALSEQ   
+								           where b1.CANYN = 'N'
+								             and b1.REGSEQ = #{regseq}
+								             and b1.WCHYN = #{wchyn}
+								             and DATE(b1.CALYDT) = DATE(#{calydt}))
+                 )
+         )
+    </insert>
+    
+    <!-- 차량 정보  -->
+    <select id="selectCarInfo" parameterType="map" resultType="map">
+        select t1.CALSEQ as calseq, t1.CARSEQ as carseq, t2.CARTYPSEQ as cartypseq, t3.CARTYPNAM as cartypnam
+             , t3.SERVNAM as servnam, t3.WCHYN as wchyn, t3.SATCNT as satcnt, t3.RMK as rmk
+             , t2.CARNUM as carnum, t2.ASNYN as asnyn, t4.SAFMNGSEQ as safmngseq, t4.SAFMNGMOBTEL as safmngmobtel
+             , t4.SAFMNGNAM as safmngnam, t4.FCMTOKEN as fcmtoken, t1.ASNSDT as asnsdt, t1.ASNEDT as asnedt
+    	  from ASNDAT t1
+               inner join CARINF t2 on
+               t1.CARSEQ = t2.CARSEQ
+               and t2.XSTA = '0'
+               inner join CARTYP t3 on
+               t2.CARTYPSEQ = t3.CARTYPSEQ
+               and t3.XSTA = '0'
+               and t3.REGSEQ = #{regseq}
+               inner join SAFMNGINF t4 on
+               t2.CARSEQ = t4.CARSEQ
+               and t4.REGSEQ = #{regseq}
+               and t4.XSTA = '0'
+    	 where t1.CALSEQ = #{calseq} 
+    </select>
+    
+    <!-- 배차차량 정보  -->
+    <select id="selectAsnCarInfo" parameterType="map" resultType="map">
+        select t1.CARTYPSEQ as cartypseq, t1.REGSEQ as regseq, t1.CARTYPNAM as cartypnam, t1.SERVNAM as servnam
+        	 , t1.WCHYN as wchyn, t1.SATCNT as satcnt, t1.RMK as rmk, t2.CARSEQ as carseq, t2.CARNUM as carnum
+        	 , t2.ASNYN as asnyn, t3.SAFMNGSEQ as safmngseq, t3.SAFMNGMOBTEL as safmngmobtel
+        	 , t3.SAFMNGNAM as safmngnam, t3.FCMTOKEN as fcmtoken
+    	  from CARTYP t1
+               inner join CARINF t2 on
+               t1.CARTYPSEQ = t2.CARTYPSEQ
+               and t2.ASNYN = 'N'
+               and t2.XSTA = '0'
+               inner join SAFMNGINF t3 on
+               t2.CARSEQ = t3.CARSEQ
+               and t3.REGSEQ = #{regseq}
+               and t3.XSTA = '0'
+    	 where t1.WCHYN = #{wchyn}
+    	   and t1.REGSEQ = #{regseq}
+    	   and t1.XSTA = '0'
+    </select>    
+    
+    <!-- 서비스 지역유무 정보  -->
+    <select id="selectServiceArea" parameterType="map" resultType="int">
+        select count(t1.REGADRSEQ)
+		  from REGADR t1
+		 where t1.XSTA = '0'
+		   and t1.REGSEQ = #{regseq}
+		   and (t1.ADR like CONCAT('%',#{adrnm},'%') or t1.STTADR like CONCAT('%',#{adrnm},'%'))    
+    </select>
+    
+</mapper>

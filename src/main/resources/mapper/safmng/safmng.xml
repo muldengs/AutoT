@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autot.safmng.mapper.SafMngMapper">
+
+	<!-- 지역정보 -->
+    <select id="selectSafMngReg" resultType="map">
+        select REGSEQ as regseq, REGNAM as regnam
+          from REG
+         where XSTA = '0'
+          order by 1
+    </select>
+   
+	<!-- 차량정보 --> 
+    <select id="selectCar" parameterType="map" resultType="map">
+        select t1.CARTYPSEQ as cartypseq, t1.CARTYPNAM as cartypnam, t1.SERVNAM as servnam
+             , t1.SATCNT as satcnt, t1.RMK as rmk, t1.WCHYN as wchyn, t2.CARSEQ as carseq, t2.CARNUM as carnum
+          from CARTYP t1
+               inner join CARINF t2 on
+               t1.CARTYPSEQ = t2.CARTYPSEQ
+               and t1.XSTA = t2.XSTA
+         where t1.XSTA = '0'
+           and t1.REGSEQ = #{regseq}
+          order by t2.CARNUM
+    </select>
+    
+	<!-- 안전관리자 로그인 --> 
+    <select id="selectSafMngLogin" parameterType="map" resultType="map">
+        select SAFMNGSEQ as safmngseq, REGSEQ as regseq, CARSEQ as carseq, SAFMNGMOBTEL as safmngmobtel
+             , SAFMNGNAM as safmngnam, SAFMNGPWD as safmngpwd, FCMTOKEN as fcmtoken, TMPPWDYN as tmppwdyn, XSTA as xsta
+          from SAFMNGINF
+         where XSTA = '0'
+           and SAFMNGMOBTEL = #{usrid}
+    </select>
+    
+	<!-- 안전관리자 정보 --> 
+    <select id="selectSafMngtel" parameterType="map" resultType="map">
+        select SAFMNGSEQ as safmngseq, REGSEQ as regseq, CARSEQ as carseq, SAFMNGMOBTEL as safmngmobtel
+             , SAFMNGNAM as safmngnam, SAFMNGPWD as safmngpwd, FCMTOKEN as fcmtoken, TMPPWDYN as tmppwdyn, XSTA as xsta
+          from SAFMNGINF
+         where XSTA = '0'
+           and SAFMNGMOBTEL = #{safmngmobtel}
+    </select>
+    
+	<!-- 안전관리자 임시비밀번호 수정 --> 
+    <update id="updateSafMngPwd" parameterType="map">
+        update SAFMNGINF
+           set XDAT = current_timestamp()
+             , TMPPWDYN = 'Y'
+             , SAFMNGPWD = #{safmngpwd}
+         where SAFMNGMOBTEL = #{safmngmobtel}
+           and FCMTOKEN = #{fcmtoken}
+           and XSTA = '0'
+    </update>
+    
+	<!-- 안전관리자 등록 --> 
+    <insert id="insertSafMngInf" parameterType="map">
+        insert into SAFMNGINF (REGSEQ, CARSEQ, SAFMNGMOBTEL, SAFMNGNAM, SAFMNGPWD, TMPPWDYN, FCMTOKEN, XSTA)
+        values (#{regseq}, #{carseq}, #{safmngmobtel}, #{safmngnam}, #{safmngpwd}, 'N', #{fcmtoken},'0')
+    </insert>
+    
+	<!-- 안전관리자 수정 --> 
+    <update id="updateSafMngInf" parameterType="map">
+        update SAFMNGINF
+           set XDAT = current_timestamp()
+		    <if test="regseq != null and regseq != ''">
+             , REGSEQ = #{regseq}
+		    </if>
+		    <if test="carseq != null and carseq != ''">
+             , CARSEQ = #{carseq}
+		    </if>
+		    <if test="safmngmobtel != null and safmngmobtel != ''">
+             , SAFMNGMOBTEL = #{safmngmobtel}
+		    </if>
+		    <if test="safmngnam != null and safmngnam != ''">
+             , SAFMNGNAM = #{safmngnam}
+		    </if>
+		    <if test="safmngpwd != null and safmngpwd != ''">
+             , SAFMNGPWD = #{safmngpwd}
+		    </if>
+		    <if test="tmppwdyn != null and tmppwdyn != ''">
+             , TMPPWDYN = #{tmppwdyn}
+		    </if>
+		    <if test="fcmtoken != null and fcmtoken != ''">
+             , FCMTOKEN = #{fcmtoken}
+		    </if>
+		    <if test="xsta != null and xsta != ''">
+             , XSTA = #{xsta}
+		    </if>
+        where SAFMNGSEQ = #{safmngseq}
+    </update>
+    
+	<!-- 안전관리자 삭제 --> 
+    <delete id="deleteSafMngInf" parameterType="map">
+        delete from SAFMNGINF
+        where SAFMNGSEQ = #{safmngseq}
+    </delete>
+    
+	<!-- 안전관리자 이력 등록 --> 
+    <insert id="insetSafMngInfHis" parameterType="map">
+        insert into SAFMNGINFHIS (SAFMNGSEQ, HISSEQ, REGSEQ, CARSEQ, SAFMNGMOBTEL, SAFMNGNAM, SAFMNGPWD, TMPPWDYN, FCMTOKEN, XSTA)
+        select t1.SAFMNGSEQ, (select NVL(Max(a1.HISSEQ),0) from SAFMNGINFHIS a1 where a1.SAFMNGSEQ = t1.SAFMNGSEQ )+1 as HISSEQ
+             , t1.REGSEQ, t1.CARSEQ, t1.SAFMNGMOBTEL, t1.SAFMNGNAM, t1.SAFMNGPWD, t1.TMPPWDYN, t1.FCMTOKEN, t1.XSTA
+          from SAFMNGINF t1
+         where t1.SAFMNGSEQ = #{safmngseq}
+    </insert>
+    
+    <!-- 안전관리자 배차내역 -->
+    <select id="selectSafMngAsn" parameterType="map" resultType="map">
+        select CONCAT(date_format(t1.CALYDT,'%H'),':00') as asntmdp 
+             , date_format(t2.ASNSDT,'%H:%i') as asnsdtdp 
+             , date_format(t2.ASNEDT,'%H:%i') as asnedtdp 
+             , CONCAT(t7.STNNAM,' - ',t8.STNNAM) as stnnamdp
+             , t1.CALSEQ as calseq, t1.RSVYN as rsvyn, t1.REGSEQ as regseq, t3.REGNAM as regnam
+             , t1.DEPLON as deplon, t1.DEPLAT as deplat, t1.DEPADR as depadr, t1.DEPSTNSEQ as depstnseq
+             , t1.DSTLON as dstlon, t1.DSTLAT as dstlat, t1.DSTADR as dstadr, t1.DSTSTNSEQ as dststnseq
+             , t1.WCHYN as wchyn, t1.SATCNT as satcnt, t1.CALYDT as calydt, t1.CANYN as canyn
+             , t1.CANRSN as canrsn, t4.CODNAM as canrsnnam, t1.CANRSNDES as canrsndes, t2.ASNSDT as asnsdt
+             , t2.ASNEDT as asnedt, t2.CARSEQ as carseq, t7.STNNAM as depstnnam, t8.STNNAM as dststnnam
+             , t5.DIST as dist, t5.FEE as fee, t5.DISTTIME as disttime, t9.USRMOBTEL as usrmobtel
+             , t9.USRNAM as usrnam, t9.FCMTOKEN as usrfcmtoken
+             , case when t1.CANYN = 'N' and t2.CARSEQ is null then '배차중'
+             		when t1.CANYN = 'N' and t2.CARSEQ is not null and t2.ASNSDT is null then '차량이동중'
+             		when t1.CANYN = 'N' and t2.CARSEQ is not null and t2.ASNSDT is not null and t2.ASNEDT is null then '운행중'
+             		when t1.CANYN = 'N' and t2.CARSEQ is not null and t2.ASNSDT is null and t2.ASNEDT is not null then '운행완료'
+             		when t1.CANYN = 'Y' and t1.CANRSN is not null then '호출취소'
+             		when t1.CANYN = 'Y' and t1.CANRSN is null then '배차취소'
+             		end as canynnam
+             , CONCAT(date_format(t1.CALYDT,'%m'),'월'
+		     		 ,date_format(t1.CALYDT,'%d'),'일',' '
+		     		 ,(case when DayofWeek(t1.CALYDT) = 1 then '일요일'
+		     		 		when DayofWeek(t1.CALYDT) = 2 then '월요일'
+		     		 		when DayofWeek(t1.CALYDT) = 3 then '화요일'
+		     		 		when DayofWeek(t1.CALYDT) = 4 then '수요일'
+		     		 		when DayofWeek(t1.CALYDT) = 5 then '목요일'
+		     		 		when DayofWeek(t1.CALYDT) = 6 then '금요일'
+		     		 		when DayofWeek(t1.CALYDT) = 7 then '토요일'
+		     		 		end),'(',date_format(t1.CALYDT,'%H:%i:%s'),')') AS calydtdp
+             , case when t2.CARSEQ is not null and t2.ASNSDT is not null and t2.ASNEDT is null then
+             		CONCAT(date_format(t2.ASNSDT,'%H:%i:%s'),' ~ ')
+             		when t2.CARSEQ is not null and t2.ASNSDT is not null and t2.ASNEDT is not null then	
+             		CONCAT(date_format(t2.ASNSDT,'%H:%i:%s'),' ~ ',date_format(t2.ASNEDT,'%H:%i:%s'),' (', date_format(TIMEDIFF(t2.ASNEDT, t2.ASNSDT),'%i'),'분)')
+             		else             
+             		CONCAT(date_format(t1.CALYDT,'%H:%i:%s'),' ~ ',CONCAT(date_format(ADDTIME(date_format(t1.CALYDT,'%H:%i:%s'),CONCAT('00:',REPLACE(t5.DISTTIME, '분', '' ),':00')),'%H:%i:%s')),'(',t5.DISTTIME,')')
+             		end AS disttimedp
+          from CAL t1
+               inner join ASNDAT t2 on
+               t1.CALSEQ = t2.CALSEQ
+               inner join REG t3 on
+               t1.REGSEQ = t3.REGSEQ
+               and t3.XSTA = '0'
+               left outer join SYSCOD t4 on
+               t1.CANRSN = t4.COD
+               and t4.PARCOD = '10000300'
+               and t4.XSTA = '0'
+               inner join STNPOL t5 on
+               t1.REGSEQ = t5.REGSEQ
+               and t1.DEPSTNSEQ = t5.SORDNUM
+               and t1.DSTSTNSEQ = t5.EORDNUM
+               and t5.XSTA = '0'
+               inner join SAFMNGINF t6 on
+               t2.CARSEQ = t6.CARSEQ
+               and t6.XSTA = '0'
+               and t6.SAFMNGSEQ = #{safmngseq}
+               inner join STN t7 on
+               t1.REGSEQ = t7.REGSEQ
+               and t1.DEPSTNSEQ = t7.ORDNUM
+               and t7.XSTA = '0'
+               inner join STN t8 on
+               t1.REGSEQ = t8.REGSEQ
+               and t1.DSTSTNSEQ = t8.ORDNUM
+               and t8.XSTA = '0'     
+               inner join USRINF t9 on
+               t1.USRSEQ = t9.USRSEQ
+               and t9.XSTA = '0'          
+         where t1.REGSEQ = #{regseq}
+           and DATE(t1.CALYDT) = DATE(CURDATE())
+          order by 1 asc, t1.CALYDT asc
+    </select>
+    
+    <!-- 안전관리자 배차내역 상세 -->
+    <select id="selectSafMngAsnDetail" parameterType="map" resultType="map">
+        select CONCAT(date_format(t1.CALYDT,'%H'),':00') as asntmdp 
+             , date_format(t2.ASNSDT,'%H:%i') as asnsdtdp 
+             , date_format(t2.ASNEDT,'%H:%i') as asnedtdp 
+             , CONCAT(t7.STNNAM,' - ',t8.STNNAM) as stnnamdp
+             , t1.CALSEQ as calseq, t1.RSVYN as rsvyn, t1.REGSEQ as regseq, t3.REGNAM as regnam
+             , t1.DEPLON as deplon, t1.DEPLAT as deplat, t1.DEPADR as depadr, t1.DEPSTNSEQ as depstnseq
+             , t1.DSTLON as dstlon, t1.DSTLAT as dstlat, t1.DSTADR as dstadr, t1.DSTSTNSEQ as dststnseq
+             , t1.WCHYN as wchyn, t1.SATCNT as satcnt, t1.CALYDT as calydt, t1.CANYN as canyn
+             , t1.CANRSN as canrsn, t4.CODNAM as canrsnnam, t1.CANRSNDES as canrsndes, t2.ASNSDT as asnsdt
+             , t2.ASNEDT as asnedt, t2.CARSEQ as carseq, t7.STNNAM as depstnnam, t8.STNNAM as dststnnam
+             , t5.DIST as dist, t5.FEE as fee, t5.DISTTIME as disttime, t9.USRMOBTEL as usrmobtel
+             , t9.USRNAM as usrnam, t9.FCMTOKEN as usrfcmtoken
+             , case when t1.CANYN = 'N' and t2.CARSEQ is null then '배차중'
+             		when t1.CANYN = 'N' and t2.CARSEQ is not null and t2.ASNSDT is null then '차량이동중'
+             		when t1.CANYN = 'N' and t2.CARSEQ is not null and t2.ASNSDT is not null and t2.ASNEDT is null then '운행중'
+             		when t1.CANYN = 'N' and t2.CARSEQ is not null and t2.ASNSDT is null and t2.ASNEDT is not null then '운행완료'
+             		when t1.CANYN = 'Y' and t1.CANRSN is not null then '호출취소'
+             		when t1.CANYN = 'Y' and t1.CANRSN is null then '배차취소'
+             		end as canynnam
+             , CONCAT(date_format(t1.CALYDT,'%m'),'월'
+		     		 ,date_format(t1.CALYDT,'%d'),'일',' '
+		     		 ,(case when DayofWeek(t1.CALYDT) = 1 then '일요일'
+		     		 		when DayofWeek(t1.CALYDT) = 2 then '월요일'
+		     		 		when DayofWeek(t1.CALYDT) = 3 then '화요일'
+		     		 		when DayofWeek(t1.CALYDT) = 4 then '수요일'
+		     		 		when DayofWeek(t1.CALYDT) = 5 then '목요일'
+		     		 		when DayofWeek(t1.CALYDT) = 6 then '금요일'
+		     		 		when DayofWeek(t1.CALYDT) = 7 then '토요일'
+		     		 		end),'(',date_format(t1.CALYDT,'%H:%i:%s'),')') AS calydtdp
+             , case when t2.CARSEQ is not null and t2.ASNSDT is not null and t2.ASNEDT is null then
+             		CONCAT(date_format(t2.ASNSDT,'%H:%i:%s'),' ~ ')
+             		when t2.CARSEQ is not null and t2.ASNSDT is not null and t2.ASNEDT is not null then	
+             		CONCAT(date_format(t2.ASNSDT,'%H:%i:%s'),' ~ ',date_format(t2.ASNEDT,'%H:%i:%s'),' (', date_format(TIMEDIFF(t2.ASNEDT, t2.ASNSDT),'%i'),'분)')
+             		else             
+             		CONCAT(date_format(t1.CALYDT,'%H:%i:%s'),' ~ ',CONCAT(date_format(ADDTIME(date_format(t1.CALYDT,'%H:%i:%s'),CONCAT('00:',REPLACE(t5.DISTTIME, '분', '' ),':00')),'%H:%i:%s')),'(',t5.DISTTIME,')')
+             		end AS disttimedp
+          from CAL t1
+               inner join ASNDAT t2 on
+               t1.CALSEQ = t2.CALSEQ
+               inner join REG t3 on
+               t1.REGSEQ = t3.REGSEQ
+               and t3.XSTA = '0'
+               left outer join SYSCOD t4 on
+               t1.CANRSN = t4.COD
+               and t4.PARCOD = '10000300'
+               and t4.XSTA = '0'
+               inner join STNPOL t5 on
+               t1.REGSEQ = t5.REGSEQ
+               and t1.DEPSTNSEQ = t5.SORDNUM
+               and t1.DSTSTNSEQ = t5.EORDNUM
+               and t5.XSTA = '0'
+               inner join SAFMNGINF t6 on
+               t2.CARSEQ = t6.CARSEQ
+               and t6.XSTA = '0'
+               and t6.SAFMNGSEQ = #{safmngseq}
+               inner join STN t7 on
+               t1.REGSEQ = t7.REGSEQ
+               and t1.DEPSTNSEQ = t7.ORDNUM
+               and t7.XSTA = '0'
+               inner join STN t8 on
+               t1.REGSEQ = t8.REGSEQ
+               and t1.DSTSTNSEQ = t8.ORDNUM
+               and t8.XSTA = '0'     
+               inner join USRINF t9 on
+               t1.USRSEQ = t9.USRSEQ
+               and t9.XSTA = '0'       
+         where t1.CALSEQ = #{calseq}
+    </select>
+    
+    <!-- 안전관리자 Call 내역 -->
+    <select id="selectSafMngCal" parameterType="map" resultType="map">
+        select CONCAT(date_format(t1.CALYDT,'%H'),':00') as asntmdp 
+             , CONCAT(t7.STNNAM,' - ',t8.STNNAM) as stnnamdp
+             , t1.CALSEQ as calseq, t1.RSVYN as rsvyn, t1.REGSEQ as regseq, t3.REGNAM as regnam
+             , t1.DEPLON as deplon, t1.DEPLAT as deplat, t1.DEPADR as depadr, t1.DEPSTNSEQ as depstnseq
+             , t1.DSTLON as dstlon, t1.DSTLAT as dstlat, t1.DSTADR as dstadr, t1.DSTSTNSEQ as dststnseq
+             , t1.WCHYN as wchyn, t1.SATCNT as satcnt, t1.CALYDT as calydt, t1.CANYN as canyn
+             , t1.CANRSN as canrsn, t4.CODNAM as canrsnnam, t1.CANRSNDES as canrsndes, t7.STNNAM as depstnnam
+             , t8.STNNAM as dststnnam, t5.DIST as dist, t5.FEE as fee, t5.DISTTIME as disttime, t9.USRMOBTEL as usrmobtel
+             , t9.USRNAM as usrnam, t9.FCMTOKEN as usrfcmtoken
+             , '배차중' as canynnam
+             , CONCAT(date_format(t1.CALYDT,'%m'),'월'
+		     		 ,date_format(t1.CALYDT,'%d'),'일',' '
+		     		 ,(case when DayofWeek(t1.CALYDT) = 1 then '일요일'
+		     		 		when DayofWeek(t1.CALYDT) = 2 then '월요일'
+		     		 		when DayofWeek(t1.CALYDT) = 3 then '화요일'
+		     		 		when DayofWeek(t1.CALYDT) = 4 then '수요일'
+		     		 		when DayofWeek(t1.CALYDT) = 5 then '목요일'
+		     		 		when DayofWeek(t1.CALYDT) = 6 then '금요일'
+		     		 		when DayofWeek(t1.CALYDT) = 7 then '토요일'
+		     		 		end),'(',date_format(t1.CALYDT,'%H:%i:%s'),')') AS calydtdp
+             , CONCAT(date_format(t1.CALYDT,'%H:%i:%s'),' ~ ',CONCAT(date_format(ADDTIME(date_format(t1.CALYDT,'%H:%i:%s'),CONCAT('00:',REPLACE(t5.DISTTIME, '분', '' ),':00')),'%H:%i:%s')),'(',t5.DISTTIME,')') AS disttimedp
+          from CAL t1
+               inner join REG t3 on
+               t1.REGSEQ = t3.REGSEQ
+               and t3.XSTA = '0'
+               left outer join SYSCOD t4 on
+               t1.CANRSN = t4.COD
+               and t4.PARCOD = '10000300'
+               and t4.XSTA = '0'
+               inner join STNPOL t5 on
+               t1.REGSEQ = t5.REGSEQ
+               and t1.DEPSTNSEQ = t5.SORDNUM
+               and t1.DSTSTNSEQ = t5.EORDNUM
+               and t5.XSTA = '0'
+               inner join STN t7 on
+               t1.REGSEQ = t7.REGSEQ
+               and t1.DEPSTNSEQ = t7.ORDNUM
+               and t7.XSTA = '0'
+               inner join STN t8 on
+               t1.REGSEQ = t8.REGSEQ
+               and t1.DSTSTNSEQ = t8.ORDNUM
+               and t8.XSTA = '0'     
+               inner join USRINF t9 on
+               t1.USRSEQ = t9.USRSEQ
+               and t9.XSTA = '0'          
+         where t1.REGSEQ = #{regseq}
+           and 0 = (select count(a1.CALSEQ)
+           			  from ASNDAT a1
+           			 where a1.CALSEQ = t1.CALSEQ)
+           and t1.RSVYN = 'N'
+           and t1.CANYN = 'N'
+           and DATE(t1.CALYDT) = DATE(CURDATE())
+          order by 1 asc, t1.CALYDT asc
+    </select>
+    
+    <!-- 안전관리자 Call 상세 -->
+    <select id="selectSafMngCalDetail" parameterType="map" resultType="map">
+        select CONCAT(date_format(t1.CALYDT,'%H'),':00') as asntmdp 
+             , CONCAT(t7.STNNAM,' - ',t8.STNNAM) as stnnamdp
+             , t1.CALSEQ as calseq, t1.RSVYN as rsvyn, t1.REGSEQ as regseq, t3.REGNAM as regnam
+             , t1.DEPLON as deplon, t1.DEPLAT as deplat, t1.DEPADR as depadr, t1.DEPSTNSEQ as depstnseq
+             , t1.DSTLON as dstlon, t1.DSTLAT as dstlat, t1.DSTADR as dstadr, t1.DSTSTNSEQ as dststnseq
+             , t1.WCHYN as wchyn, t1.SATCNT as satcnt, t1.CALYDT as calydt, t1.CANYN as canyn
+             , t1.CANRSN as canrsn, t4.CODNAM as canrsnnam, t1.CANRSNDES as canrsndes, t7.STNNAM as depstnnam
+             , t8.STNNAM as dststnnam, t5.DIST as dist, t5.FEE as fee, t5.DISTTIME as disttime, t9.USRMOBTEL as usrmobtel
+             , t9.USRNAM as usrnam, t9.FCMTOKEN as usrfcmtoken
+             , '배차중' as canynnam
+             , CONCAT(date_format(t1.CALYDT,'%m'),'월'
+		     		 ,date_format(t1.CALYDT,'%d'),'일',' '
+		     		 ,(case when DayofWeek(t1.CALYDT) = 1 then '일요일'
+		     		 		when DayofWeek(t1.CALYDT) = 2 then '월요일'
+		     		 		when DayofWeek(t1.CALYDT) = 3 then '화요일'
+		     		 		when DayofWeek(t1.CALYDT) = 4 then '수요일'
+		     		 		when DayofWeek(t1.CALYDT) = 5 then '목요일'
+		     		 		when DayofWeek(t1.CALYDT) = 6 then '금요일'
+		     		 		when DayofWeek(t1.CALYDT) = 7 then '토요일'
+		     		 		end),'(',date_format(t1.CALYDT,'%H:%i:%s'),')') AS calydtdp
+             , CONCAT(date_format(t1.CALYDT,'%H:%i:%s'),' ~ ',CONCAT(date_format(ADDTIME(date_format(t1.CALYDT,'%H:%i:%s'),CONCAT('00:',REPLACE(t5.DISTTIME, '분', '' ),':00')),'%H:%i:%s')),'(',t5.DISTTIME,')') AS disttimedp
+          from CAL t1
+               inner join REG t3 on
+               t1.REGSEQ = t3.REGSEQ
+               and t3.XSTA = '0'
+               left outer join SYSCOD t4 on
+               t1.CANRSN = t4.COD
+               and t4.PARCOD = '10000300'
+               and t4.XSTA = '0'
+               inner join STNPOL t5 on
+               t1.REGSEQ = t5.REGSEQ
+               and t1.DEPSTNSEQ = t5.SORDNUM
+               and t1.DSTSTNSEQ = t5.EORDNUM
+               and t5.XSTA = '0'
+               inner join STN t7 on
+               t1.REGSEQ = t7.REGSEQ
+               and t1.DEPSTNSEQ = t7.ORDNUM
+               and t7.XSTA = '0'
+               inner join STN t8 on
+               t1.REGSEQ = t8.REGSEQ
+               and t1.DSTSTNSEQ = t8.ORDNUM
+               and t8.XSTA = '0'     
+               inner join USRINF t9 on
+               t1.USRSEQ = t9.USRSEQ
+               and t9.XSTA = '0'    
+         where t1.CALSEQ = #{calseq}
+    </select>    
+        
+	<!-- 즉시배차 존재유무 --> 
+    <select id="selectSafMngAsnCnt" parameterType="map" resultType="int">
+        select count(CALSEQ)
+          from ASNDAT
+         where CALSEQ = #{calseq}
+    </select>
+    
+    <!-- 즉시배차 등록  -->
+    <insert id="insertSafMngAsn">
+        insert into ASNDAT (CALSEQ, CARSEQ)
+        values (#{calseq},#{carseq})
+    </insert>    
+    
+    <!-- 승차  -->
+    <update id="updateRide">
+        update ASNDAT
+           set ASNSDT = current_timestamp()
+         where CALSEQ = #{calseq}
+           and CARSEQ = #{carseq}
+    </update>  
+    
+    <!-- 하차  -->
+    <update id="updateQuit">
+        update ASNDAT
+           set ASNEDT = current_timestamp()
+         where CALSEQ = #{calseq}
+           and CARSEQ = #{carseq}
+    </update>   
+    
+    <!-- 배차 취소 -->
+    <update id="updateAsnCancel" parameterType="map">
+        update CAL
+           set XDAT = current_timestamp()
+             , CANYN = 'Y'
+             , CANRSN = null       
+             , CANRSNDES = null    
+         where CALSEQ = #{calseq}
+    </update>      
+    
+    <!-- 차량배차여부 수정  -->
+    <update id="updateCarinf">
+        update CARINF
+           set XDAT = current_timestamp()
+             , ASNYN  = #{asnyn}
+         where CARSEQ = #{carseq}
+    </update>   
+    
+</mapper>

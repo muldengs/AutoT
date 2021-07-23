@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autot.notbod.mapper.NotBodMapper">
+
+    <select id="selectNotBod" parameterType="map" resultType="map">
+        select NOTSEQ as notseq, NOTTIT as nottit, NOTCON as notcon, XDAT as xdat
+          from NOTBOD
+         where XSTA = '0'
+    </select>
+    
+   
+   	<select id="selectNotBodDetail" parameterType="map" resultType="map">
+        select NOTSEQ as notseq, NOTTIT as nottit, NOTCON as notcon, XDAT as xdat
+          from NOTBOD
+         where NOTSEQ = #{notseq}
+           and XSTA = '0'
+    </select>
+   
+    <insert id="insertNotBod">
+        insert into 
+        	NOTBOD (NOTTIT, NOTCON, XDAT, XSTA)
+        	values (#{nottit}, #{notcon}, now(), '0')
+    </insert>
+</mapper>

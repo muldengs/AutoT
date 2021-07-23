@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autot.qnabod.mapper.QnaBodMapper">
+
+    <select id="selectQnaBod" parameterType="map" resultType="map">
+        select QNASEQ as qnaseq, USRSEQ as usrseq, QSTCON as qstcon
+             , IFNULL(AWS,"") AS aws, IFNULL(ANSCON,"") AS anscon, XDAT as xdat
+          from QNABOD
+         where USRSEQ = #{usrseq}
+           and XSTA = '0'
+    </select>
+
+    <insert id="insertQnaBod">
+        insert into 
+        	QNABOD (USRSEQ, QSTCON, XDAT, XSTA)
+        	values (#{usrseq}, #{qstcon}, now(), '0')
+    </insert>
+    
+</mapper>

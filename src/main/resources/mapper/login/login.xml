@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autot.login.mapper.LoginMapper">
+
+    <select id="selectTrminf" resultType="map">
+        select TRMSEQ as trmseq, TRMNAM as trmnam, TRMCON as trmcon, TRMURL as trmurl
+             , TRMFILPTH as trmfilpth, TRMFIL as trmfil, REQUIRED as required
+          from TRMINF
+         where XSTA = '0'
+          order by 1
+    </select>
+    
+    <select id="selectUsrTrmchk" parameterType="map" resultType="map">
+        select t2.USRSEQ as usrseq, t1.TRMSEQ as trmseq, t1.CHKYN as chkyn
+             , t3.TRMNAM as trmnam, t3.REQUIRED as required
+          from USRTRMCHK t1
+          	   inner join USRINF t2 on
+          	   t1.USRSEQ = t2.USRSEQ
+          	   and t1.XSTA = t2.XSTA
+          	   and t2.USRMOBTEL = #{usrmobtel}
+          	   inner join TRMINF t3 on 
+          	   t1.TRMSEQ = t3.TRMSEQ
+          	   and t1.XSTA = t3.XSTA
+         where t1.XSTA = '0'
+          order by 2
+    </select>
+    
+    <select id="selectReg" resultType="map">
+        select REGSEQ as regseq, REGNAM as regnam
+          from REG
+         where XSTA = '0'
+          order by 1
+    </select>
+    
+    <select id="selectUsrCer" parameterType="map" resultType="String">
+        select CERNUM as cernum
+          from USRCER
+         where USRMOBTEL = #{usrmobtel}
+    </select>
+    
+    <insert id="insetUsrCer">
+        insert into USRCER (USRMOBTEL, CERNUM)
+        values (#{usrmobtel}, #{cernum})
+    </insert>
+    
+    <delete id="deleteUsrCer" parameterType="map">
+        delete from USRCER
+        where USRMOBTEL = #{usrmobtel}
+    </delete>
+    
+    <insert id="insetUsrTrmchk">
+        insert into USRTRMCHK (USRSEQ, TRMSEQ, CHKYN, XSTA)
+        values (#{usrseq}, #{trmseq}, #{chkyn},'0')
+    </insert>
+    
+    <delete id="deleteUsrTrmchk" parameterType="map">
+        delete from USRTRMCHK
+        where USRSEQ = #{usrseq}
+    </delete>
+    
+    
+</mapper>

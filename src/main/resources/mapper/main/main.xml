@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autot.main.mapper.MainMapper">
+
+	<!-- 이용내역 -->
+    <select id="selectCal" parameterType="map" resultType="map">
+        select t1.CALSEQ as calseq, t1.RSVYN as rsvyn, t1.REGSEQ as regseq, t3.REGNAM as regnam
+             , t1.DEPLON as deplon, t1.DEPLAT as deplat, t1.DEPADR as depadr, t1.DEPSTNSEQ as depstnseq
+             , t1.DSTLON as dstlon, t1.DSTLAT as dstlat, t1.DSTADR as dstadr, t1.DSTSTNSEQ as dststnseq
+             , t1.WCHYN as wchyn, t1.SATCNT as satcnt, t1.CALYDT as calydt, t1.CANYN as canyn
+             , t1.CANRSN as canrsn, t4.CODNAM as canrsnnam, t1.CANRSNDES as canrsndes, t2.ASNSDT as asnsdt
+             , t2.ASNEDT as asnedt, t2.CARSEQ as carseq, t5.DIST as dist, t5.FEE as fee, t5.DISTTIME as disttime
+             , case when t1.CANYN = 'N' and t2.CARSEQ is null then '배차중'
+             		when t1.CANYN = 'N' and t2.CARSEQ is not null and t2.ASNSDT is null then '차량이동중'
+             		when t1.CANYN = 'N' and t2.CARSEQ is not null and t2.ASNSDT is not null and t2.ASNEDT is null then '운행중'
+             		when t1.CANYN = 'N' and t2.CARSEQ is not null and t2.ASNSDT is null and t2.ASNEDT is not null then '운행완료'
+             		when t1.CANYN = 'Y' and t1.CANRSN is not null then '호출취소'
+             		when t1.CANYN = 'Y' and t1.CANRSN is null then '배차취소'
+             		end as canynname
+             , CONCAT(date_format(t1.CALYDT,'%m'),'월'
+		     		 ,date_format(t1.CALYDT,'%d'),'일',' '
+		     		 ,(case when DayofWeek(t1.CALYDT) = 1 then '일요일'
+		     		 		when DayofWeek(t1.CALYDT) = 2 then '월요일'
+		     		 		when DayofWeek(t1.CALYDT) = 3 then '화요일'
+		     		 		when DayofWeek(t1.CALYDT) = 4 then '수요일'
+		     		 		when DayofWeek(t1.CALYDT) = 5 then '목요일'
+		     		 		when DayofWeek(t1.CALYDT) = 6 then '금요일'
+		     		 		when DayofWeek(t1.CALYDT) = 7 then '토요일'
+		     		 		end),'(',date_format(t1.CALYDT,'%H:%i:%s'),')') AS calydtdp
+             , case when t2.CARSEQ is not null and t2.ASNSDT is not null and t2.ASNEDT is null then
+             		CONCAT(date_format(t2.ASNSDT,'%H:%i:%s'),' ~ ')
+             		when t2.CARSEQ is not null and t2.ASNSDT is not null and t2.ASNEDT is not null then	
+             		CONCAT(date_format(t2.ASNSDT,'%H:%i:%s'),' ~ ',date_format(t2.ASNEDT,'%H:%i:%s'),' (', date_format(TIMEDIFF(t2.ASNEDT, t2.ASNSDT),'%i'),'분)')
+             		else             
+             		CONCAT(date_format(t1.CALYDT,'%H:%i:%s'),' ~ ',CONCAT(date_format(ADDTIME(date_format(t1.CALYDT,'%H:%i:%s'),CONCAT('00:',REPLACE(t5.DISTTIME, '분', '' ),':00')),'%H:%i:%s')),'(',t5.DISTTIME,')')
+             		end AS disttimedp
+          from CAL t1
+               left outer join ASNDAT t2 on
+               t1.CALSEQ = t2.CALSEQ
+               inner join REG t3 on
+               t1.REGSEQ = t3.REGSEQ
+               and t3.XSTA = '0'
+               left outer join SYSCOD t4 on
+               t1.CANRSN = t4.COD
+               and t4.PARCOD = '10000300'
+               and t4.XSTA = '0'
+               inner join STNPOL t5 on
+               t1.REGSEQ = t5.REGSEQ
+               and t1.DEPSTNSEQ = t5.SORDNUM
+               and t1.DSTSTNSEQ = t5.EORDNUM
+               and t5.XSTA = '0'
+         where t1.USRSEQ = #{usrseq}
+           and t1.RSVYN = #{rsvyn}
+          order by 1 desc
+    </select>
+    
+    <!-- 이용내역 상세 -->
+    <select id="selectCalDetail" parameterType="map" resultType="map">
+        select t1.CALSEQ as calseq, t1.RSVYN as rsvyn, t1.REGSEQ as regseq, t3.REGNAM as regnam
+             , t1.DEPLON as deplon, t1.DEPLAT as deplat, t1.DEPADR as depadr, t1.DEPSTNSEQ as depstnseq
+             , t1.DSTLON as dstlon, t1.DSTLAT as dstlat, t1.DSTADR as dstadr, t1.DSTSTNSEQ as dststnseq
+             , t1.WCHYN as wchyn, t1.SATCNT as satcnt, t1.CALYDT as calydt, t1.CANYN as canyn
+             , t1.CANRSN as canrsn, t4.CODNAM as canrsnnam, t1.CANRSNDES as canrsndes, t2.ASNSDT as asnsdt
+             , t2.ASNEDT as asnedt, t2.CARSEQ as carseq, t5.DIST as dist, t5.FEE as fee, t5.DISTTIME as disttime
+             , case when t1.CANYN = 'N' and t2.CARSEQ is null then '배차중'
+             		when t1.CANYN = 'N' and t2.CARSEQ is not null and t2.ASNSDT is null then '차량이동중'
+             		when t1.CANYN = 'N' and t2.CARSEQ is not null and t2.ASNSDT is not null and t2.ASNEDT is null then '운행중'
+             		when t1.CANYN = 'N' and t2.CARSEQ is not null and t2.ASNSDT is null and t2.ASNEDT is not null then '운행완료'
+             		when t1.CANYN = 'Y' and t1.CANRSN is not null then '호출취소'
+             		when t1.CANYN = 'Y' and t1.CANRSN is null then '배차취소'
+             		end as canynname
+             , CONCAT(date_format(t1.CALYDT,'%m'),'월'
+		     		 ,date_format(t1.CALYDT,'%d'),'일',' '
+		     		 ,(case when DayofWeek(t1.CALYDT) = 1 then '일요일'
+		     		 		when DayofWeek(t1.CALYDT) = 2 then '월요일'
+		     		 		when DayofWeek(t1.CALYDT) = 3 then '화요일'
+		     		 		when DayofWeek(t1.CALYDT) = 4 then '수요일'
+		     		 		when DayofWeek(t1.CALYDT) = 5 then '목요일'
+		     		 		when DayofWeek(t1.CALYDT) = 6 then '금요일'
+		     		 		when DayofWeek(t1.CALYDT) = 7 then '토요일'
+		     		 		end),'(',date_format(t1.CALYDT,'%H:%i:%s'),')') AS calydtdp
+             , case when t2.CARSEQ is not null and t2.ASNSDT is not null and t2.ASNEDT is null then
+             		CONCAT(date_format(t2.ASNSDT,'%H:%i:%s'),' ~ ')
+             		when t2.CARSEQ is not null and t2.ASNSDT is not null and t2.ASNEDT is not null then	
+             		CONCAT(date_format(t2.ASNSDT,'%H:%i:%s'),' ~ ',date_format(t2.ASNEDT,'%H:%i:%s'),' (', date_format(TIMEDIFF(t2.ASNEDT, t2.ASNSDT),'%i'),'분)')
+             		else             
+             		CONCAT(date_format(t1.CALYDT,'%H:%i:%s'),' ~ ',CONCAT(date_format(ADDTIME(date_format(t1.CALYDT,'%H:%i:%s'),CONCAT('00:',REPLACE(t5.DISTTIME, '분', '' ),':00')),'%H:%i:%s')),'(',t5.DISTTIME,')')
+             		end AS disttimedp
+          from CAL t1
+               left outer join ASNDAT t2 on
+               t1.CALSEQ = t2.CALSEQ
+               inner join REG t3 on
+               t1.REGSEQ = t3.REGSEQ
+               and t3.XSTA = '0'
+               left outer join SYSCOD t4 on
+               t1.CANRSN = t4.COD
+               and t4.PARCOD = '10000300'
+               and t4.XSTA = '0'
+               inner join STNPOL t5 on
+               t1.REGSEQ = t5.REGSEQ
+               and t1.DEPSTNSEQ = t5.SORDNUM
+               and t1.DSTSTNSEQ = t5.EORDNUM
+               and t5.XSTA = '0'
+         where t1.CALSEQ = #{calseq}
+    </select>
+    
+    <!-- 서울 지역 즉시호출 가능여부 -->
+    <select id="selectAsnSeoul" parameterType="map" resultType="map">
+        select NVL(SUM(CASE WHEN t2.WCHYN ='Y' THEN 1 ELSE 0 END),0) AS wchycnt
+             , NVL(SUM(CASE WHEN t2.WCHYN ='N' THEN 1 ELSE 0 END),0) AS wchncnt
+          from CARINF t1
+          	   inner join CARTYP t2 on
+          	   t1.CARTYPSEQ = t2.CARTYPSEQ
+          	   and t1.XSTA = t2.XSTA
+          	   and t2.REGSEQ = #{regseq}
+         where t1.ASNYN = 'Y'
+           and t1.XSTA = '0'
+    </select> 
+      
+    <!-- 서울 외 지역 즉시호출 가능여부 -->
+    <select id="selectAsnSeoulNon" parameterType="map" resultType="map">
+        select count(t1.CARSEQ) as asncnt
+          from CARINF t1
+          	   inner join CARTYP t2 on
+          	   t1.CARTYPSEQ = t2.CARTYPSEQ
+          	   and t1.XSTA = t2.XSTA
+          	   and t2.REGSEQ = #{regseq}
+         where t1.ASNYN = 'Y'
+           and t1.XSTA = '0'
+    </select>   
+    
+    <!-- 호출 취소 -->
+    <update id="updateCalCancel" parameterType="map">
+        update CAL
+           set XDAT = current_timestamp()
+             , CANYN = 'Y'
+             , CANRSN = #{canrsn}             
+		    <if test="canrsndes != null and canrsndes != ''">
+             , CANRSNDES = #{canrsndes}
+		    </if>
+        where CALSEQ = #{calseq}
+    </update>    
+         
+    
+    <!-- 호출 취소 차량배차여부 수정  -->
+    <update id="updateCarinfCalCancel">
+        update CARINF
+           set XDAT = current_timestamp()
+             , ASNYN  = 'N'
+         where CARSEQ = (select a1.CARSEQ from ASNDAT a1 where a1.CALSEQ = #{calseq})
+    </update>   
+</mapper>

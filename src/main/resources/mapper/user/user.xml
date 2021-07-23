@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autot.user.mapper.UserMapper">
+
+    <select id="selectUsers" parameterType="map" resultType="map">
+        select USRSEQ as usrseq, USREML as usreml, USRMOBTEL as usrmobtel, USRNAM as usrnam
+             , USRPWD as usrpwd, TMPPWDYN as tmppwdyn, FCMTOKEN as fcmtoken, XSTA as xsta
+          from USRINF
+         where XSTA = '0'
+		    <if test="usreml != null and usreml != ''">
+           and USREML = #{usreml}
+		    </if>
+		    <if test="usrmobtel != null and usrmobtel != ''">
+           and USRMOBTEL = #{usrmobtel}
+		    </if>
+		    <if test="usrnam != null and usrnam != ''">
+           and USRNAM = #{usrnam}
+		    </if>
+          order by 1
+    </select>
+    
+    <select id="selectUserTel" parameterType="map" resultType="map">
+        select USRSEQ as usrseq, USREML as usreml, USRMOBTEL as usrmobtel, USRNAM as usrnam
+             , USRPWD as usrpwd, TMPPWDYN as tmppwdyn, FCMTOKEN as fcmtoken, XSTA as xsta
+          from USRINF
+         where USRMOBTEL = #{usrmobtel}
+           and XSTA = '0'
+    </select>
+    
+    <select id="selectUserEml" parameterType="map" resultType="map">
+        select USRSEQ as usrseq, USREML as usreml, USRMOBTEL as usrmobtel, USRNAM as usrnam
+             , USRPWD as usrpwd, TMPPWDYN as tmppwdyn, FCMTOKEN as fcmtoken, XSTA as xsta
+          from USRINF
+         where USREML = #{usreml}
+           and XSTA = '0'
+    </select>
+    
+    <select id="selectUserInfo" parameterType="map" resultType="map">
+        select USRSEQ as usrseq, USREML as usreml, USRMOBTEL as usrmobtel, USRNAM as usrnam
+             , USRPWD as usrpwd, TMPPWDYN as tmppwdyn, FCMTOKEN as fcmtoken, XSTA as xsta
+          from USRINF
+         where USRSEQ = #{usrseq}
+           and XSTA = '0'
+    </select>
+    
+    <select id="selectLogin" parameterType="map" resultType="map">
+        select USRSEQ as usrseq, USREML as usreml, USRMOBTEL as usrmobtel, USRNAM as usrnam
+             , USRPWD as usrpwd, TMPPWDYN as tmppwdyn, FCMTOKEN as fcmtoken, XSTA as xsta
+          from USRINF
+         where XSTA = '0'
+           and (USRMOBTEL = #{usrid} or USREML = #{usrid})
+    </select>
+    
+    <select id="selectDuplicate" parameterType="map" resultType="int">
+        select count(USRSEQ)
+          from USRINF
+         where XSTA = '0'
+		    <if test="usreml != null and usreml != ''">
+           and USREML = #{usreml}
+		    </if>
+		    <if test="usrmobtel != null and usrmobtel != ''">
+           and USRMOBTEL = #{usrmobtel}
+		    </if>
+    </select>
+    
+    <insert id="insertUser">
+        insert into USRINF (USREML, USRMOBTEL, USRNAM, USRPWD, TMPPWDYN, FCMTOKEN, XSTA)
+        values (#{usreml}, #{usrmobtel}, #{usrnam}, #{usrpwd}, #{tmppwdyn}, #{fcmtoken},'0')
+    </insert>
+    
+    <update id="updateUser" parameterType="map">
+        update USRINF
+           set XDAT = current_timestamp()
+		    <if test="usreml != null and usreml != ''">
+             , USREML = #{usreml}
+		    </if>
+		    <if test="usrmobtel != null and usrmobtel != ''">
+             , USRMOBTEL = #{usrmobtel}
+		    </if>
+		    <if test="usrnam != null and usrnam != ''">
+             , USRNAM = #{usrnam}
+		    </if>
+		    <if test="usrpwd != null and usrpwd != ''">
+             , USRPWD = #{usrpwd}
+		    </if>
+		    <if test="tmppwdyn != null and tmppwdyn != ''">
+             , TMPPWDYN = #{tmppwdyn}
+		    </if>
+		    <if test="fcmtoken != null and fcmtoken != ''">
+             , FCMTOKEN = #{fcmtoken}
+		    </if>
+		    <if test="xsta != null and xsta != ''">
+             , XSTA = #{xsta}
+		    </if>
+        where USRSEQ = #{usrseq}
+    </update>
+    
+    <update id="updateUserPwd" parameterType="map">
+        update USRINF
+           set XDAT = current_timestamp()
+             , TMPPWDYN = 'Y'
+             , USRPWD = #{usrpwd}
+         where USRMOBTEL = #{usrmobtel}
+           and FCMTOKEN = #{fcmtoken}
+           and XSTA = '0'
+    </update>
+    
+    <delete id="deleteUser" parameterType="map">
+        delete from USRINF
+        where USRSEQ = #{usrseq}
+    </delete>
+    
+    <insert id="insetUserHis">
+        insert into USRINFHIS (USRSEQ, HISSEQ, USREML, USRMOBTEL, USRNAM, USRPWD, TMPPWDYN, FCMTOKEN, XSTA)
+        select t1.USRSEQ, (select NVL(Max(a1.HISSEQ),0) from USRINFHIS a1 where a1.USRSEQ = t1.USRSEQ )+1 as HISSEQ
+             , t1.USREML, t1.USRMOBTEL, t1.USRNAM, t1.USRPWD, t1.TMPPWDYN, t1.FCMTOKEN, t1.XSTA
+          from USRINF t1
+         where t1.USRSEQ = #{usrseq}
+    </insert>
+    
+    
+</mapper>

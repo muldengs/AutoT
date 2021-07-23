@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autot.log.mapper.LogMapper">
+
+    <select id="selectLogs" parameterType="map" resultType="map">
+        select LOGSEQ as logseq, USRSEQ as usrseq, REQNAM as reqnam, REQTIM as reqtim
+          from SYSLOG
+         where 1 = 1
+		    <if test="usrseq != null and usrseq != ''">
+           and USRSEQ = #{usrseq}
+		    </if>
+		    <if test="reqnam != null and reqnam != ''">
+           and REQNAM = #{reqnam}
+		    </if>
+          order by 1
+    </select>
+    
+    <insert id="insetLog">
+        insert into SYSLOG (USRSEQ, REQNAM)
+        values (#{usrseq}, #{reqnam})
+    </insert>
+    
+</mapper>
