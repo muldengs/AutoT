@@ -59,8 +59,7 @@ public class PushMessage {
 	
 	public static void sendPush(Map<String, Object> m) throws Exception {
 		
-		 try {    
-			 	System.out.println("1111111111111111111111111111");
+		 try {
 	            HttpHeaders headers = new HttpHeaders();
 	            headers.add("content-type" , "application/json; UTF-8");
 	            headers.add("Authorization", "Bearer " + getAccessToken());
