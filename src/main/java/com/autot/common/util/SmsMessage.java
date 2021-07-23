@@ -20,7 +20,7 @@ public class SmsMessage {
 		String api_key = "API_KEY";  //api키
         String api_secret = "Secret_api_key"; // 비밀키
         Message coolsms = new Message(api_key, api_secret);
-
+        logger.debug("로스 테스트");
         Map<String, Object> resultMap = new HashMap<String, Object>();
         
         // 4 params(to, from, type, text) are mandatory. must be filled
